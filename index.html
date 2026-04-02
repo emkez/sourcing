@@ -1,0 +1,1272 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Сорсинг в Telegram — Инструкция</title>
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;700;900&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:ital,wght@0,300;0,400;0,500;1,300&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0d0d0d;
+    --surface: #161616;
+    --surface2: #1f1f1f;
+    --border: #2a2a2a;
+    --accent: #c8f135;
+    --accent2: #3df2c4;
+    --accent3: #ff6b35;
+    --text: #e8e8e8;
+    --muted: #666;
+    --step-w: 680px;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'IBM Plex Sans', sans-serif;
+    font-weight: 300;
+    line-height: 1.6;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* HEADER */
+  header {
+    padding: 80px 60px 60px;
+    border-bottom: 1px solid var(--border);
+    position: relative;
+    overflow: hidden;
+  }
+
+  header::before {
+    content: '';
+    position: absolute;
+    top: -100px;
+    right: -100px;
+    width: 500px;
+    height: 500px;
+    background: radial-gradient(circle, rgba(200,241,53,0.08) 0%, transparent 70%);
+    pointer-events: none;
+  }
+
+  .label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    letter-spacing: 0.2em;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+  }
+
+  h1 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: clamp(28px, 5vw, 52px);
+    font-weight: 900;
+    line-height: 1.1;
+    color: #fff;
+    max-width: 600px;
+  }
+
+  h1 span {
+    color: var(--accent);
+  }
+
+  .subtitle {
+    margin-top: 16px;
+    color: var(--muted);
+    font-size: 15px;
+    max-width: 480px;
+  }
+
+  /* PIPELINE BAR */
+  .pipeline {
+    display: flex;
+    align-items: center;
+    gap: 0;
+    padding: 28px 60px;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+  .pipeline::-webkit-scrollbar { display: none; }
+
+  .pipe-step {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .pipe-dot {
+    width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    transition: all 0.3s;
+    cursor: default;
+  }
+
+  .pipe-step:hover .pipe-dot {
+    background: var(--accent);
+    color: #000;
+    border-color: var(--accent);
+  }
+
+  .pipe-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .pipe-arrow {
+    width: 40px;
+    height: 1px;
+    background: var(--border);
+    flex-shrink: 0;
+    margin: 0 4px;
+    position: relative;
+  }
+  .pipe-arrow::after {
+    content: '';
+    position: absolute;
+    right: -4px;
+    top: -3px;
+    width: 0;
+    height: 0;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+    border-left: 5px solid var(--border);
+  }
+
+  /* MAIN */
+  main {
+    padding: 60px;
+    max-width: 900px;
+  }
+
+  /* STEP */
+  .step {
+    display: grid;
+    grid-template-columns: 80px 1fr;
+    gap: 0 32px;
+    margin-bottom: 56px;
+    opacity: 0;
+    transform: translateY(20px);
+    animation: fadeUp 0.5s forwards;
+  }
+
+  .step:nth-child(1) { animation-delay: 0.1s; }
+  .step:nth-child(2) { animation-delay: 0.2s; }
+  .step:nth-child(3) { animation-delay: 0.3s; }
+  .step:nth-child(4) { animation-delay: 0.4s; }
+  .step:nth-child(5) { animation-delay: 0.5s; }
+  .step:nth-child(6) { animation-delay: 0.6s; }
+  .step:nth-child(7) { animation-delay: 0.7s; }
+  .step:nth-child(8) { animation-delay: 0.8s; }
+  .step:nth-child(9) { animation-delay: 0.9s; }
+  .step:nth-child(10) { animation-delay: 1.0s; }
+
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .step-num {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0;
+  }
+
+  .num-badge {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Unbounded', sans-serif;
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    background: var(--surface);
+    flex-shrink: 0;
+  }
+
+  .step-line {
+    width: 1px;
+    flex: 1;
+    background: var(--border);
+    margin-top: 8px;
+    min-height: 40px;
+  }
+
+  .step-body {
+    padding-top: 8px;
+    padding-bottom: 32px;
+  }
+
+  .step-tag {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    color: var(--accent2);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .step h2 {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 16px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 12px;
+    line-height: 1.3;
+  }
+
+  .step p {
+    font-size: 14px;
+    color: #aaa;
+    margin-bottom: 12px;
+  }
+
+  /* CHIPS */
+  .chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 14px;
+  }
+
+  .chip {
+    padding: 5px 12px;
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    border-radius: 2px;
+    transition: all 0.2s;
+  }
+
+  .chip:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  .chip.highlight {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(200,241,53,0.04);
+  }
+
+  /* PROMPT BLOCK */
+  .prompt-block {
+    margin-top: 20px;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    background: var(--surface);
+  }
+
+  .prompt-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 16px;
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    user-select: none;
+  }
+
+  .prompt-header-left {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .prompt-icon {
+    width: 20px;
+    height: 20px;
+    background: var(--accent);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .prompt-icon svg {
+    width: 12px;
+    height: 12px;
+  }
+
+  .prompt-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    font-weight: 500;
+  }
+
+  .toggle-btn {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    padding: 4px 10px;
+    border: 1px solid var(--border);
+    background: transparent;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .toggle-btn:hover {
+    color: var(--accent);
+    border-color: var(--accent);
+  }
+
+  .prompt-content {
+    display: none;
+    padding: 20px;
+    max-height: 400px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+    scrollbar-color: var(--border) transparent;
+  }
+
+  .prompt-content.open {
+    display: block;
+  }
+
+  .prompt-content pre {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: #bbb;
+    white-space: pre-wrap;
+    line-height: 1.7;
+  }
+
+  .prompt-content pre .kw { color: var(--accent); }
+  .prompt-content pre .comment { color: var(--muted); }
+  .prompt-content pre .str { color: var(--accent2); }
+
+  .copy-btn {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    padding: 8px 16px;
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: all 0.2s;
+    width: fit-content;
+  }
+
+  .copy-btn:hover {
+    background: var(--accent);
+    color: #000;
+  }
+
+  /* CRM CHECK TABLE */
+  .info-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+  }
+
+  .info-card {
+    padding: 14px 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--accent3);
+  }
+
+  .info-card.green {
+    border-top-color: var(--accent2);
+  }
+
+  .info-card .ic-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 6px;
+  }
+
+  .info-card .ic-val {
+    font-size: 13px;
+    color: var(--text);
+  }
+
+  /* TABS (step 4) */
+  .tab-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 16px;
+  }
+
+  .tab {
+    padding: 8px 16px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    border-radius: 2px;
+    position: relative;
+    transition: all 0.2s;
+  }
+
+  .tab::before {
+    content: attr(data-n);
+    position: absolute;
+    top: -8px;
+    left: -8px;
+    width: 18px;
+    height: 18px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 9px;
+    color: var(--accent);
+    font-family: 'IBM Plex Mono', monospace;
+    line-height: 18px;
+    text-align: center;
+  }
+
+  .tab:hover {
+    border-color: var(--accent2);
+    color: var(--accent2);
+  }
+
+  /* NOTE */
+  .note {
+    display: flex;
+    gap: 12px;
+    padding: 14px 16px;
+    background: rgba(255, 107, 53, 0.06);
+    border: 1px solid rgba(255,107,53,0.2);
+    margin-top: 14px;
+  }
+
+  .note-icon {
+    font-size: 16px;
+    flex-shrink: 0;
+    margin-top: 2px;
+  }
+
+  .note p {
+    font-size: 13px;
+    color: #999;
+    margin: 0;
+  }
+
+  /* FOOTER */
+  footer {
+    margin-top: 40px;
+    padding: 40px 60px;
+    border-top: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: gap;
+  }
+
+  .footer-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  .footer-badge {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    border: 1px solid var(--border);
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+  }
+
+  .dot-live {
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: var(--accent);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  /* TIMING BADGE */
+  .time-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 3px 10px;
+    background: rgba(200,241,53,0.07);
+    border: 1px solid rgba(200,241,53,0.2);
+    border-radius: 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent);
+    margin-bottom: 14px;
+  }
+
+  .time-badge svg { opacity: 0.7; }
+
+  /* MESSAGE TEMPLATE */
+  .msg-template {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid #7b61ff;
+  }
+
+  .msg-template-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 16px;
+    border-bottom: 1px solid var(--border);
+  }
+
+  .msg-template-title {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: #7b61ff;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .msg-dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: #7b61ff;
+    animation: pulse 2s infinite;
+  }
+
+  .msg-body {
+    padding: 18px 20px;
+    font-size: 14px;
+    color: #ccc;
+    line-height: 1.75;
+    white-space: pre-wrap;
+    font-family: 'IBM Plex Sans', sans-serif;
+  }
+
+  .msg-body .highlight-name { color: var(--accent); font-weight: 500; }
+  .msg-body .highlight-link { color: var(--accent2); }
+  .msg-body .highlight-pos  { color: #ff6b35; font-weight: 500; }
+
+  /* HIDDEN COMPANIES BLOCK */
+  .hidden-companies {
+    margin-top: 16px;
+    background: var(--surface);
+    border: 1px solid rgba(255,107,53,0.25);
+    border-left: 3px solid var(--accent3);
+  }
+
+  .hc-header {
+    padding: 12px 16px;
+    border-bottom: 1px solid rgba(255,107,53,0.15);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--accent3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .hc-body {
+    padding: 16px 18px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .hc-route {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: rgba(255,107,53,0.04);
+    border: 1px solid rgba(255,107,53,0.12);
+  }
+
+  .hc-route-icon {
+    font-size: 18px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
+
+  .hc-route-text {
+    font-size: 13px;
+    color: #bbb;
+    line-height: 1.6;
+  }
+
+  .hc-route-text strong { color: var(--accent3); }
+  .hc-route-text a { color: var(--accent2); text-decoration: none; }
+  .hc-route-text a:hover { text-decoration: underline; }
+
+  /* TOTAL TIME BLOCK */
+  .total-time {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    padding: 16px 20px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    margin-top: 16px;
+  }
+
+  .total-time-num {
+    font-family: 'Unbounded', sans-serif;
+    font-size: 32px;
+    font-weight: 900;
+    color: var(--accent);
+    line-height: 1;
+    flex-shrink: 0;
+  }
+
+  .total-time-label {
+    font-size: 13px;
+    color: var(--muted);
+    line-height: 1.5;
+  }
+
+  .total-time-label strong { color: var(--text); display: block; }
+
+  /* TIMING TABLE */
+  .timing-table {
+    margin-top: 14px;
+    width: 100%;
+    border-collapse: collapse;
+  }
+
+  .timing-table tr {
+    border-bottom: 1px solid var(--border);
+  }
+
+  .timing-table tr:last-child { border-bottom: none; }
+
+  .timing-table td {
+    padding: 8px 12px;
+    font-size: 13px;
+    color: #aaa;
+    vertical-align: middle;
+  }
+
+  .timing-table td:first-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    width: 36px;
+    text-align: center;
+  }
+
+  .timing-table td:last-child {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .timing-table tr:hover td { background: rgba(255,255,255,0.02); }
+
+
+  @media (max-width: 640px) {
+    header, main, footer { padding: 40px 24px; }
+    .pipeline { padding: 20px 24px; }
+    .step { grid-template-columns: 56px 1fr; gap: 0 16px; }
+    .num-badge { width: 44px; height: 44px; font-size: 14px; }
+    .info-grid { grid-template-columns: 1fr; }
+    h1 { font-size: 26px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="label">// SOP — Telegram Sourcing</div>
+  <h1>Сорсинг вакансий<br>и контактов <span>из Telegram</span></h1>
+  <p class="subtitle">Пошаговая инструкция по парсингу чатов, обработке данных через Claude и занесению в CRM</p>
+  <div style="margin-top:24px;display:flex;align-items:center;gap:12px;">
+    <div style="width:32px;height:32px;background:var(--accent);display:flex;align-items:center;justify-content:center;font-family:'Unbounded',sans-serif;font-size:12px;font-weight:700;color:#000;flex-shrink:0;">EK</div>
+    <div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:12px;color:#fff;font-weight:500;">Emil Khalikov</div>
+      <div style="font-family:'IBM Plex Mono',monospace;font-size:11px;color:var(--muted);margin-top:2px;">Business Development · GB Agency</div>
+    </div>
+  </div>
+</header>
+
+<!-- PIPELINE -->
+<div class="pipeline">
+  <div class="pipe-step"><div class="pipe-dot">01</div><div class="pipe-label">Выбор чатов</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">02</div><div class="pipe-label">Экспорт</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">03</div><div class="pipe-label">Claude</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">04</div><div class="pipe-label">5 вкладок</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">05</div><div class="pipe-label">CRM</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">06</div><div class="pipe-label">TG поиск</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">07</div><div class="pipe-label">Аутрич</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">08</div><div class="pipe-label">LinkedIn/Habr</div></div>
+  <div class="pipe-arrow"></div>
+  <div class="pipe-step"><div class="pipe-dot">09</div><div class="pipe-label">Итерация / цикл</div></div>
+</div>
+
+<main>
+
+  <!-- TIMING OVERVIEW -->
+  <div style="padding:0 0 48px;">
+    <div class="total-time">
+      <div class="total-time-num">~15<span style="font-size:16px;color:var(--muted)"> мин</span></div>
+      <div class="total-time-label">
+        <strong>на одну компанию</strong>
+        включая предварительную подготовку и все шаги аутрича
+      </div>
+    </div>
+    <table class="timing-table">
+      <tr><td>01</td><td>Выбор списка чатов</td><td style="color:var(--muted)">однократно</td></tr>
+      <tr><td>02</td><td>Экспорт чата из Telegram</td><td>~2 мин</td></tr>
+      <tr><td>03</td><td>Обработка через Claude</td><td>~3 мин</td></tr>
+      <tr><td>04</td><td>Открытие 5 вкладок</td><td>~30 сек</td></tr>
+      <tr><td>05</td><td>CRM-проверка + данные из Perplexity</td><td>~2 мин</td></tr>
+      <tr><td>06</td><td>Поиск по Telegram</td><td>~1 мин</td></tr>
+      <tr><td>07</td><td>Первое сообщение ЛПРу</td><td>~2 мин</td></tr>
+      <tr><td>08</td><td>LinkedIn + Habr</td><td>~5 мин</td></tr>
+      <tr><td>09</td><td>Переход к следующей позиции</td><td>~15 сек</td></tr>
+    </table>
+  </div>
+
+  <!-- STEP 1 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">01</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Подготовка</div>
+      <h2>Выбор списка Telegram-чатов</h2>
+      <p>Составляешь список из <strong style="color:#fff">40–50 чатов</strong>, которые планируешь отработать в рамках одного цикла.</p>
+      <div class="chips">
+        <span class="chip highlight">40–50 чатов</span>
+        <span class="chip">тематические каналы</span>
+        <span class="chip">HR-сообщества</span>
+        <span class="chip">IT-вакансии</span>
+        <span class="chip">профессиональные чаты</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 2 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">02</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Экспорт данных</div>
+      <h2>Экспорт истории сообщений из Telegram</h2>
+      <p>Каждый чат экспортируешь <strong style="color:#fff">по одному</strong> через Telegram Desktop.</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Период</div>
+          <div class="ic-val">Последние 3 месяца</div>
+        </div>
+        <div class="info-card green">
+          <div class="ic-label">Медиафайлы</div>
+          <div class="ic-val">Отключены (только текст)</div>
+        </div>
+        <div class="info-card green">
+          <div class="ic-label">Формат</div>
+          <div class="ic-val">messages.html</div>
+        </div>
+        <div class="info-card">
+          <div class="ic-label">Метод</div>
+          <div class="ic-val">Telegram Desktop → Экспорт чата</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 3 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">03</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">AI-обработка</div>
+      <h2>Обработка через Claude (Opus)</h2>
+      <p>Загружаешь <code style="background:var(--surface2);padding:2px 6px;font-family:'IBM Plex Mono',monospace;font-size:12px;color:var(--accent2)">messages.html</code> в Claude и запускаешь промпт ниже. Оптимально использовать <strong style="color:#fff">Claude Opus</strong> — Sonnet тоже справляется, но чуть хуже извлекает контакты.</p>
+
+      <div class="prompt-block">
+        <div class="prompt-header" onclick="togglePrompt()">
+          <div class="prompt-header-left">
+            <div class="prompt-icon">
+              <svg viewBox="0 0 12 12" fill="none"><path d="M2 2h8v8H2z" stroke="#000" stroke-width="1.5"/><path d="M4 5h4M4 7h2" stroke="#000" stroke-width="1.2"/></svg>
+            </div>
+            <span class="prompt-title">ПРОМПТ: извлечение компаний и контактов рекрутеров</span>
+          </div>
+          <button class="toggle-btn" id="toggleLabel">ПОКАЗАТЬ</button>
+        </div>
+        <div class="prompt-content" id="promptContent">
+          <pre><span class="kw"># Инструкция для Claude: извлечение компаний и контактов рекрутеров из `messages.html`</span>
+
+Твоя задача — обработать HTML-экспорт сообщений и собрать Excel-файл для внутренней команды.
+
+<span class="kw">## Цель</span>
+Нужно достать <span class="str">**списком компании**</span> из сообщений, где есть:
+- название компании;
+- контакт рекрутера;
+- при необходимости — ссылка на вакансию;
+
+Также нужно на отдельный лист вынести сообщения, где:
+- название компании <span class="str">**спрятано намеренно**</span> или замаскировано;
+- при этом есть контакт рекрутера.
+
+<span class="kw">## Что считать подходящей записью</span>
+Запись включается в основной лист, если в сообщении есть минимум:
+1. <span class="str">**Компания**</span> — явное название компании, бренд, домен, ссылка на сайт, название работодателя или клиента.
+2. <span class="str">**Контакт рекрутера**</span> — Telegram, email, LinkedIn, форма отклика, ник, личный контакт, указанный как способ связи.
+
+Если компания не названа напрямую, но есть признаки вроде:
+- NDA;
+- "product company", "US client", "large client", "stealth startup";
+- ссылка без явного бренда;
+- бренд зашит в домене, сокращении, картинке или тексте без явного поля Company;
+
+то такую запись <span class="str">**не теряй**</span> — выноси на отдельный лист `Вакансии для пробива`.
+
+<span class="kw">## Формат итогового Excel</span>
+Сделай workbook минимум с 3 листами:
+
+<span class="kw">### 1) Лист `Компании`</span>
+Основной реестр найденных компаний.
+
+Столбцы:
+1. Дата
+2. Отправитель
+3. Компания
+4. Контакт рекрутера
+5. Ссылка на вакансию
+6. Позиция
+7. Локация
+8. Сайт компании (если нет в сообщении, то найди сам)
+9. Линкедин компании (если нет в сообщении, то найди сам)
+10. Размер компании (если нет в сообщении, то найди сам)
+
+<span class="kw">### 2) Лист `Спрятанные компании`</span>
+Сюда попадают сообщения, где компания не названа явно, но есть рекрутерский контакт и есть шанс вычислить компанию.
+
+Столбцы:
+1. Дата
+2. Отправитель
+3. Предполагаемая компания
+4. Контакт рекрутера
+5. Заметка
+
+<span class="kw">## Правила извлечения</span>
+
+<span class="comment">### Название компании</span>
+Ищи компанию в таком приоритете:
+1. Явное поле Company, Компания, We at &lt;brand&gt;.
+2. Название в тексте вакансии.
+3. Бренд в ссылке на сайт или домене.
+4. Если явно не найдено — вынеси на лист Спрятанные компании.
+
+<span class="comment">### Контакт рекрутера</span>
+Нужно извлекать любые контакты:
+- t.me/...
+- @username
+- email
+- LinkedIn URL
+- Google Form / Typeform / Ashby / Greenhouse / сайт отклика
+Если контактов несколько — складывай через ; в одну ячейку.
+
+<span class="comment">### Удаление дублей</span>
+Дубль = Компания + Контакт рекрутера совпадают, ИЛИ тот же ID сообщения.
+НО: если у одной компании разные контакты — это НЕ дубль.
+
+<span class="kw">## Технические требования к файлу</span>
+- один .xlsx файл
+- автофильтры на всех листах
+- закрепить верхнюю строку
+- перенос текста для Фрагмент сообщения и Заметка
+- подобрать ширину колонок
+- отсортировать основной лист по дате, новые сверху
+
+<span class="kw">## Важные ограничения</span>
+- Не выдумывай компании, если уверенность низкая.
+- Если компания не доказана — положи на лист Спрятанные компании.
+- Не теряй сообщения только из-за того, что бренд замаскирован.
+- Оставляй Фрагмент сообщения, чтобы человек мог быстро перепроверить вывод.</pre>
+          <button class="copy-btn" onclick="copyPrompt()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M1 10V1h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Скопировать промпт
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 4 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">04</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Рабочее пространство</div>
+      <h2>Открываешь 5 вкладок одновременно</h2>
+      <p>Для эффективной обработки таблицы всё открыто параллельно:</p>
+      <div class="tab-row">
+        <div class="tab" data-n="1">Google Drive — Excel от Claude</div>
+        <div class="tab" data-n="2">AmoCRM</div>
+        <div class="tab" data-n="3">Perplexity</div>
+        <div class="tab" data-n="4">LinkedIn</div>
+        <div class="tab" data-n="5">Habr</div>
+      </div>
+
+      <p style="margin-top:18px;font-size:14px;color:#aaa;">Во вкладке <strong style="color:var(--accent2)">Perplexity</strong> заранее вставлен промпт анализа компании — при переходе к каждой новой строке просто вводишь название компании и получаешь готовую выжимку с ЛПР и контактами:</p>
+
+      <div class="prompt-block" style="border-left-color:var(--accent2);">
+        <div class="prompt-header" onclick="togglePrompt2()">
+          <div class="prompt-header-left">
+            <div class="prompt-icon" style="background:var(--accent2);">
+              <svg viewBox="0 0 12 12" fill="none"><circle cx="6" cy="6" r="4" stroke="#000" stroke-width="1.4"/><path d="M6 4v2.5l1.5 1" stroke="#000" stroke-width="1.2" stroke-linecap="round"/></svg>
+            </div>
+            <span class="prompt-title" style="color:var(--accent2);">ПРОМПТ: анализ компании для аутрича (Perplexity)</span>
+          </div>
+          <button class="toggle-btn" id="toggleLabel2">ПОКАЗАТЬ</button>
+        </div>
+        <div class="prompt-content" id="promptContent2">
+          <pre><span class="kw">Мне нужно получать краткую выжимку по компаниям для аутрича.</span>
+На каждый мой ввод — это только название компании.
+Твоя задача — найти и выдать строго в таком формате и только данные,
+без пояснений и лишнего текста:
+
+<span class="str">1. Тип компании</span>
+   сервисная / продуктовая / смешанная (одно слово или короткая фраза)
+
+<span class="str">2. Страна регистрации (HQ)</span>
+   страна, город (если есть)
+
+<span class="str">3. Сайт компании</span>
+   полный URL
+
+<span class="str">4. LinkedIn компании</span>
+   название + URL или «нет данных», если не найдено
+
+<span class="str">5. Количество сотрудников</span>
+   вилка/оценка (например, 11–50, 51–200, 201–500 и т.п.)
+
+<span class="str">6. ЛПР (C‑level, тех, коммерция, русскоязычные, если есть)</span>
+   Список буллетами, по каждому:
+   • Имя Фамилия — должность, страна/город (если есть) — LinkedIn URL
+
+<span class="str">7. ЛПР по HR (HRD / Head of HR / HRBP / HR / Recruiter, русскоязычные, если есть)</span>
+   Список буллетами, по каждому:
+   • Имя Фамилия — должность, страна/город (если есть) — LinkedIn URL
+
+<span class="comment">Если каких‑то данных нет, пиши «нет данных» на соответствующей строке,
+а не пропускай строку.
+Никаких вводных фраз, пояснений, комментариев, выводов —
+только сухие данные по структуре выше.</span></pre>
+          <button class="copy-btn" style="border-color:var(--accent2);color:var(--accent2);" onclick="copyPrompt2()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M1 10V1h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Скопировать промпт
+          </button>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:14px;">
+        <span class="note-icon">💡</span>
+        <p>Промпт вводится один раз при открытии вкладки. Дальше просто печатаешь название компании — Perplexity сам подтягивает актуальные данные из сети.</p>
+      </div>
+      <div class="note" style="margin-top:8px;border-color:rgba(61,242,196,0.2);background:rgba(61,242,196,0.04);">
+        <span class="note-icon">📋</span>
+        <p>Данные из Perplexity (ЛПР, сайт, LinkedIn, размер компании) <strong style="color:#fff">заносишь в карточку компании в AmoCRM</strong> — в соответствующие поля сделки.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 5 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">05</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">CRM-проверка</div>
+      <div class="time-badge">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        ~1 мин
+      </div>
+      <h2>Проверка и создание сделки в AmoCRM</h2>
+      <p>Название компании вбиваешь в поиск по CRM и смотришь историю:</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">Если история ≥ 300 дней</div>
+          <div class="ic-val">Создаёшь новую сделку, заполняешь с нуля. Старую ссылку скидываешь Диме на удаление.</div>
+        </div>
+        <div class="info-card green">
+          <div class="ic-label">Если история свежая</div>
+          <div class="ic-val">Работаешь в существующей сделке, обновляешь данные.</div>
+        </div>
+      </div>
+
+      <div class="hidden-companies" style="margin-top:20px;">
+        <div class="hc-header">
+          <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><path d="M7 1L1 5v8h4V9h4v4h4V5L7 1z" stroke="currentColor" stroke-width="1.3" stroke-linejoin="round"/></svg>
+          Что делать со скрытыми компаниями (лист «Спрятанные компании»)
+        </div>
+        <div class="hc-body">
+          <p style="font-size:13px;color:var(--muted);padding:0 2px;">Если Claude не смог вычислить компанию — не теряй запись. Есть два пути для пробива:</p>
+          <div class="hc-route">
+            <div class="hc-route-icon">🤖</div>
+            <div class="hc-route-text">
+              <strong>Бот для пробива</strong><br>
+              Пересылаешь вакансию или описание в <a href="https://t.me/GBhelperrr_bot" target="_blank">@GBhelperrr_bot</a> — бот помогает найти название компании и контакты рекрутера.
+            </div>
+          </div>
+          <div class="hc-route">
+            <div class="hc-route-icon">👥</div>
+            <div class="hc-route-text">
+              <strong>Спросить у коллег напрямую</strong><br>
+              Если бот не справился — уточняешь в личку у <a href="https://t.me/Cheburechnayakartoshka" target="_blank">Ильгара @Cheburechnayakartoshka</a> или <a href="https://t.me/chonysnoopy" target="_blank">Лизы @chonysnoopy</a>. Они пробивают название и находят контакты рекрутеров.
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 6 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">06</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Telegram-поиск</div>
+      <div class="time-badge">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        ~1 мин
+      </div>
+      <h2>Поиск по всем чатам в Telegram</h2>
+      <p>Открываешь Telegram и через глобальный поиск по сообщениям ищешь название компании. Видишь сразу все вакансии из <strong style="color:#fff">50+ чатов</strong>, отсортированные по дате — можно быстро оценить активность и свежесть постингов.</p>
+      <div class="note">
+        <span class="note-icon">💡</span>
+        <p>Это позволяет быстро понять, насколько активно компания публикует вакансии и нет ли уже более актуального постинга, который не попал в выгрузку.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 7 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">07</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Первый контакт</div>
+      <div class="time-badge">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        ~2 мин
+      </div>
+      <h2>Прописываешь ЛПР, который постил вакансию</h2>
+      <p>Находишь аккаунт рекрутера / ЛПР в Telegram и отправляешь первое сообщение. Персонализируй имя и название вакансии под конкретный случай:</p>
+
+      <div class="msg-template">
+        <div class="msg-template-header">
+          <div class="msg-template-title">
+            <div class="msg-dot"></div>
+            Шаблон первого сообщения — Telegram
+          </div>
+          <button class="toggle-btn" id="msgToggleLabel" onclick="toggleMsg()">ПОКАЗАТЬ</button>
+        </div>
+        <div class="prompt-content" id="msgContent">
+          <div class="msg-body"><span class="highlight-name">[Имя]</span>, добрый день!
+
+Я представляю hr-агентство GBagency (<span class="highlight-link">https://www.gbhiring.com/</span>), увидел в чате что вы в поиске <span class="highlight-pos">[должность из вакансии]</span>
+
+У нашей команды богатый опыт закрытия разнообразных сложных вакансий, выработана большая база сильных it-специалистов по всему миру (более 50.000 человек). Хотел предложить возможность сотрудничества)
+
+Было бы интересно обсудить это?</div>
+          <button class="copy-btn" style="border-color:#7b61ff;color:#7b61ff;margin:0 20px 16px;" onclick="copyMsg()">
+            <svg width="14" height="14" viewBox="0 0 14 14" fill="none"><rect x="3" y="3" width="8" height="8" rx="1" stroke="currentColor" stroke-width="1.2"/><path d="M1 10V1h9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/></svg>
+            Скопировать шаблон
+          </button>
+        </div>
+      </div>
+
+      <div class="note" style="margin-top:12px;border-color:rgba(123,97,255,0.2);background:rgba(123,97,255,0.05);">
+        <span class="note-icon">✏️</span>
+        <p>Обязательно замени <strong style="color:#fff">[Имя]</strong> и <strong style="color:#ff6b35">[должность из вакансии]</strong> — персонализация критична для конверсии.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 8 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">08</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">LinkedIn + Habr</div>
+      <div class="time-badge">
+        <svg width="11" height="11" viewBox="0 0 11 11" fill="none"><circle cx="5.5" cy="5.5" r="4.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 3v2.5l1.5 1" stroke="currentColor" stroke-width="1.1" stroke-linecap="round"/></svg>
+        ~5 мин
+      </div>
+      <h2>Расширенный поиск новых ЛПР</h2>
+      <p>Параллельно ищешь дополнительные контакты в двух источниках:</p>
+      <div class="info-grid">
+        <div class="info-card">
+          <div class="ic-label">LinkedIn</div>
+          <div class="ic-val">Находишь ЛПР → отправляешь запрос на коннект → пишешь после принятия в друзья.</div>
+        </div>
+        <div class="info-card green">
+          <div class="ic-label">Habr Career</div>
+          <div class="ic-val">Ищешь телефоны и Telegram-контакты → пишешь сразу напрямую.</div>
+        </div>
+      </div>
+      <div class="note">
+        <span class="note-icon">⚡</span>
+        <p>В LinkedIn — только после принятия коннекта. В Habr — можно сразу, так как контакты публичные.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- STEP 9 -->
+  <div class="step">
+    <div class="step-num">
+      <div class="num-badge">09</div>
+      <div class="step-line"></div>
+    </div>
+    <div class="step-body">
+      <div class="step-tag">Итерация и цикл</div>
+      <h2>Следующая позиция → следующий чат</h2>
+      <p>Обработав одну компанию — переходишь к следующей строке в таблице от Claude, повторяешь шаги 5–8. Когда таблица по текущему чату отработана полностью — возвращаешься к шагу 2, экспортируешь следующий чат из списка и начинаешь заново.</p>
+      <div class="chips">
+        <span class="chip highlight">компания готова</span>
+        <span class="chip">→ следующая строка</span>
+        <span class="chip">→ таблица закончилась?</span>
+        <span class="chip">→ следующий чат</span>
+        <span class="chip">→ экспорт → Claude</span>
+      </div>
+    </div>
+  </div>
+
+</main>
+
+<footer>
+  <div class="footer-label">// telegram sourcing SOP — v1.0</div>
+  <div class="footer-badge">
+    <div class="dot-live"></div>
+    Claude Opus · Excel · AmoCRM
+  </div>
+</footer>
+
+<script>
+  function togglePrompt() {
+    const content = document.getElementById('promptContent');
+    const label = document.getElementById('toggleLabel');
+    content.classList.toggle('open');
+    label.textContent = content.classList.contains('open') ? 'СКРЫТЬ' : 'ПОКАЗАТЬ';
+  }
+
+  function copyPrompt() {
+    const promptText = document.getElementById('promptContent').querySelector('pre').innerText;
+    navigator.clipboard.writeText(promptText).then(() => {
+      const btn = document.querySelectorAll('.copy-btn')[0];
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Скопировано';
+      btn.style.background = 'var(--accent)';
+      btn.style.color = '#000';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2000);
+    });
+  }
+
+  function toggleMsg() {
+    const content = document.getElementById('msgContent');
+    const label = document.getElementById('msgToggleLabel');
+    content.classList.toggle('open');
+    label.textContent = content.classList.contains('open') ? 'СКРЫТЬ' : 'ПОКАЗАТЬ';
+  }
+
+  function copyMsg() {
+    const text = document.getElementById('msgContent').querySelector('.msg-body').innerText;
+    navigator.clipboard.writeText(text).then(() => {
+      const btns = document.querySelectorAll('.copy-btn');
+      const btn = btns[2];
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Скопировано';
+      btn.style.background = '#7b61ff';
+      btn.style.color = '#fff';
+      setTimeout(() => { btn.innerHTML = orig; btn.style.background = ''; btn.style.color = ''; }, 2000);
+    });
+  }
+
+  function togglePrompt2() {
+    const content = document.getElementById('promptContent2');
+    const label = document.getElementById('toggleLabel2');
+    content.classList.toggle('open');
+    label.textContent = content.classList.contains('open') ? 'СКРЫТЬ' : 'ПОКАЗАТЬ';
+  }
+
+  function copyPrompt2() {
+    const promptText = document.getElementById('promptContent2').querySelector('pre').innerText;
+    navigator.clipboard.writeText(promptText).then(() => {
+      const btns = document.querySelectorAll('.copy-btn');
+      const btn = btns[1];
+      const orig = btn.innerHTML;
+      btn.innerHTML = '✓ Скопировано';
+      btn.style.background = 'var(--accent2)';
+      btn.style.color = '#000';
+      setTimeout(() => {
+        btn.innerHTML = orig;
+        btn.style.background = '';
+        btn.style.color = '';
+      }, 2000);
+    });
+  }
+</script>
+
+</body>
+</html>
